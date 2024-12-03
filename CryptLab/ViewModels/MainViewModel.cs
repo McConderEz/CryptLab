@@ -83,37 +83,44 @@ public class MainViewModel: ViewModel
 
     private async void OnEncryptCommandExecute(object p)
     {
-        (Key, IV) = AesEncryption.GenerateKeyAndIV();
-        
-        AesEncryption aes = new AesEncryption();
-        var encryptedText = aes.Encrypt(_text, Key, IV);
-        
-        RsaEncryption rsa = new RsaEncryption();
-        
-        (string privateKey, string publicKey) = rsa.GenerateKeys();
-        rsa.LoadKeys(publicKey);
-        
-        var keyEncrypted = rsa.Encrypt(_key);
-        var ivEncrypted = rsa.Encrypt(_iv);
-        
-        var hash = Sha1HashCalculate.ComputeSha1Hash(Text);
-        var dsaParameters = DsaEncryption.GenerateParams();
-        
-        var signature = DsaEncryption.SignMessage(hash, dsaParameters);
-
-        var jsonDsaParams = JsonSerializer.Serialize(dsaParameters, new JsonSerializerOptions
+        try
         {
-            Converters = { new DSAParametersConverter() }
-        });
-        
-        await File.WriteAllTextAsync(ENCRYPTED_TEXT_PATH, encryptedText);
-        await File.WriteAllTextAsync(AES_KEY_PATH, keyEncrypted);
-        await File.WriteAllTextAsync(AES_IV_PATH, ivEncrypted);
-        await File.WriteAllTextAsync(RSA_PUBLIC_KEY_PATH, publicKey);
-        await File.WriteAllTextAsync(RSA_PRIVATE_KEY_PATH, privateKey);
-        await File.WriteAllTextAsync(SIGNATURE_PATH, signature);
-        await File.WriteAllTextAsync(HASH_PATH, hash);
-        await File.WriteAllTextAsync(DSA_PARAMETERS_PATH, jsonDsaParams);
+            (Key, IV) = AesEncryption.GenerateKeyAndIV();
+
+            AesEncryption aes = new AesEncryption();
+            var encryptedText = aes.Encrypt(_text, Key, IV);
+
+            RsaEncryption rsa = new RsaEncryption();
+
+            (string privateKey, string publicKey) = rsa.GenerateKeys();
+            rsa.LoadKeys(publicKey);
+
+            var keyEncrypted = rsa.Encrypt(_key);
+            var ivEncrypted = rsa.Encrypt(_iv);
+
+            var hash = Sha1HashCalculate.ComputeSha1Hash(Text);
+            var dsaParameters = DsaEncryption.GenerateParams();
+
+            var signature = DsaEncryption.SignMessage(hash, dsaParameters);
+
+            var jsonDsaParams = JsonSerializer.Serialize(dsaParameters, new JsonSerializerOptions
+            {
+                Converters = { new DSAParametersConverter() }
+            });
+
+            await File.WriteAllTextAsync(ENCRYPTED_TEXT_PATH, encryptedText);
+            await File.WriteAllTextAsync(AES_KEY_PATH, keyEncrypted);
+            await File.WriteAllTextAsync(AES_IV_PATH, ivEncrypted);
+            await File.WriteAllTextAsync(RSA_PUBLIC_KEY_PATH, publicKey);
+            await File.WriteAllTextAsync(RSA_PRIVATE_KEY_PATH, privateKey);
+            await File.WriteAllTextAsync(SIGNATURE_PATH, signature);
+            await File.WriteAllTextAsync(HASH_PATH, hash);
+            await File.WriteAllTextAsync(DSA_PARAMETERS_PATH, jsonDsaParams);
+        }
+        catch (ArgumentNullException ex)
+        {
+            MessageBox.Show("Возможно вы забыли внести данные для шифрования");
+        }
     }
 
     private bool CanEncryptCommandExecute(object p) => true;
@@ -125,26 +132,33 @@ public class MainViewModel: ViewModel
 
     private async void OnDecryptCommandExecute(object p)
     {
-        var encryptedText = await File.ReadAllTextAsync(ENCRYPTED_TEXT_PATH);
-        var keyEncrypted = await File.ReadAllTextAsync(AES_KEY_PATH);
-        var ivEncrypted = await File.ReadAllTextAsync(AES_IV_PATH);
-        var privateKey = await File.ReadAllTextAsync(RSA_PRIVATE_KEY_PATH);
-        var signature = await File.ReadAllTextAsync(SIGNATURE_PATH);
-        var stringDsaParams = await File.ReadAllTextAsync(DSA_PARAMETERS_PATH);
-
-        var dsaParameters = JsonSerializer.Deserialize<DSAParameters>(stringDsaParams,  new JsonSerializerOptions
+        try
         {
-            Converters = { new DSAParametersConverter() }
-        });
-        
-        RsaEncryption rsa = new RsaEncryption();
-        rsa.LoadKeys(privateKey);
-        
-        var key = rsa.Decrypt(keyEncrypted);
-        var iv = rsa.Decrypt(ivEncrypted);
-        
-        AesEncryption aes = new AesEncryption();
-        DecryptedText = aes.Decrypt(encryptedText, key, iv);
+            var encryptedText = await File.ReadAllTextAsync(ENCRYPTED_TEXT_PATH);
+            var keyEncrypted = await File.ReadAllTextAsync(AES_KEY_PATH);
+            var ivEncrypted = await File.ReadAllTextAsync(AES_IV_PATH);
+            var privateKey = await File.ReadAllTextAsync(RSA_PRIVATE_KEY_PATH);
+            var signature = await File.ReadAllTextAsync(SIGNATURE_PATH);
+            var stringDsaParams = await File.ReadAllTextAsync(DSA_PARAMETERS_PATH);
+
+            var dsaParameters = JsonSerializer.Deserialize<DSAParameters>(stringDsaParams, new JsonSerializerOptions
+            {
+                Converters = { new DSAParametersConverter() }
+            });
+
+            RsaEncryption rsa = new RsaEncryption();
+            rsa.LoadKeys(privateKey);
+
+            var key = rsa.Decrypt(keyEncrypted);
+            var iv = rsa.Decrypt(ivEncrypted);
+
+            AesEncryption aes = new AesEncryption();
+            DecryptedText = aes.Decrypt(encryptedText, key, iv);
+        }
+        catch (ArgumentNullException ex)
+        {
+            MessageBox.Show("Отсутствуют файлы для расшифровки данных");
+        }
 
     }
 
@@ -158,25 +172,32 @@ public class MainViewModel: ViewModel
 
     private async void OnVerifyCommandExecute(object p)
     {
-        var signature = await File.ReadAllTextAsync(SIGNATURE_PATH);
-        var stringDsaParams = await File.ReadAllTextAsync(DSA_PARAMETERS_PATH);
-
-        var dsaParameters = JsonSerializer.Deserialize<DSAParameters>(stringDsaParams,  new JsonSerializerOptions
+        try
         {
-            Converters = { new DSAParametersConverter() }
-        });
-        
-        var hash = Sha1HashCalculate.ComputeSha1Hash(DecryptedText);
-        
-        var result = DsaEncryption.VerifySignature(
-            hash, 
-            Convert.FromBase64String(signature),
-            dsaParameters);
+            var signature = await File.ReadAllTextAsync(SIGNATURE_PATH);
+            var stringDsaParams = await File.ReadAllTextAsync(DSA_PARAMETERS_PATH);
 
-        if (result)
-            MessageBox.Show("Верная сигнатура");
-        else
-            MessageBox.Show("Неверная сигнатура");
+            var dsaParameters = JsonSerializer.Deserialize<DSAParameters>(stringDsaParams, new JsonSerializerOptions
+            {
+                Converters = { new DSAParametersConverter() }
+            });
+
+            var hash = Sha1HashCalculate.ComputeSha1Hash(DecryptedText);
+
+            var result = DsaEncryption.VerifySignature(
+                hash,
+                Convert.FromBase64String(signature),
+                dsaParameters);
+
+            if (result)
+                MessageBox.Show("Верная сигнатура");
+            else
+                MessageBox.Show("Неверная сигнатура");
+        }
+        catch (ArgumentNullException ex)
+        {
+            MessageBox.Show("Отсутствуют данные для верификации");
+        }
     }
 
     private bool CanVerifyCommandExecute(object p) => true;
