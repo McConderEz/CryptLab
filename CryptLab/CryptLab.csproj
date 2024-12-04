@@ -9,15 +9,19 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Models\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <Page Update="Views\MainWindow.xaml">
         <Generator>MSBuild:Compile</Generator>
         <XamlRuntime>Wpf</XamlRuntime>
         <SubType>Designer</SubType>
       </Page>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="MahApps.Metro.IconPacks.Material" Version="5.1.0" />
+      <PackageReference Include="MahApps.Metro.IconPacks.MaterialDesign" Version="5.1.0" />
+      <PackageReference Include="MaterialDesignColors" Version="3.1.0" />
+      <PackageReference Include="MaterialDesignThemes" Version="5.1.0" />
+      <PackageReference Include="MaterialDesignThemes.MahApps" Version="3.1.0" />
     </ItemGroup>
 
 </Project>

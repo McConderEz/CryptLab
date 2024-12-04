@@ -6,36 +6,63 @@
         xmlns:local="clr-namespace:CryptLab"
         xmlns:vm="clr-namespace:CryptLab.ViewModels"
         mc:Ignorable="d"
-        Title="MainWindow" Height="800" Width="600">
+        WindowStyle="None"
+        WindowStartupLocation="CenterScreen"
+        AllowsTransparency="True" Background="Transparent"
+        Title="MainWindow" Height="600" Width="800"
+        xmlns:theme="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks">
     <Window.DataContext>
         <vm:MainViewModel/>
     </Window.DataContext>
-    <Grid>
-        <StackPanel Orientation="Vertical" 
-                    VerticalAlignment="Top" 
-                    HorizontalAlignment="Right"
-                    Margin="0 20 40  0">
-            <TextBox TextWrapping="Wrap" Height="300" Width="300" Text="{Binding Text}"/>
-            <Button Height="20" Width="100" Content="Загрузить текст" Margin="0 10 0 0"
-                    Command="{Binding LoadTextFromFileCommand}"/>
-            <TextBox TextWrapping="Wrap"
-                     Height="300" 
-                     Width="300" 
-                     Text="{Binding DecryptedText}"
-                     Margin="0 10 0 0"/>
-        </StackPanel>
-        <StackPanel Orientation="Vertical"
-                    VerticalAlignment="Top"
-                    HorizontalAlignment="Left"
-                    Margin="40 40 0 0">
-            <Button Height="30" Width="150" Content="Зашифровать" Margin="40 10 0 0"
-                    Command="{Binding EncryptCommand}"/>
-            <Button Height="30" Width="150" Content="Расшифровать" Margin="40 10 0 0"
-                    Command="{Binding DecryptCommand}"/>
-            <Button Height="30" Width="150" Content="Проверить подпись" Margin="40 10 0 0"
-                    Command="{Binding VerifyCommand}"/>
-        </StackPanel>
-
-
-    </Grid>
+    <Border Background="#eff2f7" CornerRadius="30" 
+            MouseDown="Border_MouseDown" MouseLeftButtonDown="Border_MouseLeftButtonDown">
+        <Grid>
+            <Button HorizontalAlignment="Right" VerticalAlignment="Top" Style="{StaticResource topButton}"
+                    Margin="0 5 15 0"
+                    Command="{Binding CloseApplicationCommand}">
+                <iconPacks:PackIconMaterial Kind="Close" Width="15" Height="15"/>
+            </Button>
+            <StackPanel Orientation="Horizontal" 
+                        VerticalAlignment="Top" 
+                        HorizontalAlignment="Center"
+                        Margin="0 50 0  0"
+            >
+                <TextBox Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                         TextWrapping="Wrap"
+                         Height="300" Width="300"
+                         Text="{Binding Text}"
+                         Margin="20 0 20 0"/>
+                <TextBox Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                         TextWrapping="Wrap"
+                         Height="300" Width="300"
+                         Text="{Binding DecryptedText}"
+                         IsReadOnly="True"
+                         Margin="20 0 20 0"/>
+            </StackPanel>
+            <StackPanel Orientation="Vertical"
+                        VerticalAlignment="Bottom"
+                        HorizontalAlignment="Left"
+                        Margin="40 0 0 170">
+                <Button Height="30" Width="150" Content="Загрузить текст" Margin="40 10 0 0"
+                        Command="{Binding LoadTextFromFileCommand}"
+                        Style="{StaticResource ActionButton}"/>
+                <Button Height="30" Width="150" Content="Зашифровать" Margin="40 10 0 0"
+                        Command="{Binding EncryptCommand}"
+                        Style="{StaticResource ActionButton}"/>
+            </StackPanel>
+            <StackPanel Orientation="Vertical"
+                        VerticalAlignment="Bottom"
+                        HorizontalAlignment="Right"
+                        Margin="0 0 40 170">
+                <Button Height="30" Width="150" Content="Расшифровать" Margin="0 10 40 0"
+                        Command="{Binding DecryptCommand}"
+                        Style="{StaticResource ActionButton}"/>
+                <Button Height="30" Width="150" Content="Проверить подпись" Margin="0 10 40 0"
+                        Command="{Binding VerifyCommand}"
+                        Style="{StaticResource ActionButton}"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+                
 </Window>

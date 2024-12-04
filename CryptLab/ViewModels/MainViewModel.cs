@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Net;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Windows;
@@ -52,6 +51,17 @@ public class MainViewModel: ViewModel
         set => Set(ref _key, value);
     }
 
+    #region CloseApplicationCommand
+    public ICommand CloseApplicationCommand { get; }
+
+    private void OnCloseApplicationCommandExecute(object p)
+    {
+        System.Windows.Application.Current.Shutdown();
+    }
+
+    private bool CanCloseApplicationCommandExecute(object p) => true;
+    #endregion
+    
     #region LoadTextFromFile
 
     public ICommand LoadTextFromFileCommand { get; }
@@ -212,5 +222,6 @@ public class MainViewModel: ViewModel
         EncryptCommand = new LambdaCommand(OnEncryptCommandExecute);
         DecryptCommand = new LambdaCommand(OnDecryptCommandExecute);
         VerifyCommand = new LambdaCommand(OnVerifyCommandExecute);
+        CloseApplicationCommand = new LambdaCommand(OnCloseApplicationCommandExecute);
     }
 }
